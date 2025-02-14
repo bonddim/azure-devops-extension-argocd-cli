@@ -1,0 +1,15 @@
+{
+  "scripts": {
+    "build": "tsc",
+    "bump-version": "vsts-bump --indent 4 task.json",
+    "lint": "tslint -c tslint.json -p .",
+    "start": "npm run build; node dist/index.js",
+    "test": "tsc && npm --prefix tests/ run test",
+    "tsc": "npm run lint && tsc"
+  },
+  "dependencies": {
+    "azure-pipelines-task-lib": "^4.17.3",
+    "azure-pipelines-tool-lib": "^2.0.8",
+    "@types/node": "^22.13.1"
+  }
+}
