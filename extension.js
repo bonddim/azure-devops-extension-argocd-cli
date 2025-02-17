@@ -6,9 +6,9 @@ module.exports = (env) => {
   return {
     manifestVersion: 1,
     id: `argocd-installer${idPostfix}`,
-    version: "0.1.0",
-    name: `Argo CD Installer${namePostfix}`,
-    description: "Argo CD Installer Task for Azure DevOps",
+    version: "0.1.1",
+    name: `Argo CD CLI Installer${namePostfix}`,
+    description: "Argo CD CLI Installer Task for Azure DevOps",
     publisher: "bonddim",
     public: isPublic,
     categories: ["Azure Pipelines"],
@@ -35,6 +35,7 @@ module.exports = (env) => {
       type: "git",
       uri: repository,
     },
+    tags: ["Argo CD", "Argo CD CLI", "Tool", "Installer"],
     targets: [
       {
         id: "Microsoft.VisualStudio.Services",

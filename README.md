@@ -1,4 +1,4 @@
-# Argo CD Task For Azure DevOps Pipelines
+# Argo CD CLI Installer Task for Azure DevOps
 
 This extension installs the [Argo CD CLI](https://argo-cd.readthedocs.io/en/stable/) on an Azure DevOps agent.
 It automates the installation process and configures the environment for seamless integration with your pipeline.
@@ -6,8 +6,8 @@ It automates the installation process and configures the environment for seamles
 ## Features
 
 - Installs the latest [released](https://github.com/argoproj/argo-cd/releases) version by default.
-- Supports Linux, macOS, and Windows agents.
-- Creates an **Argo CD Server** service connection to securely store credentials.
+- Supports Linux, MacOS, and Windows agents.
+- Adds **Argo CD Server** service connection to securely store credentials.
 - Sets **ARGOCD_SERVER** and **ARGOCD_AUTH_TOKEN** environment variables from the provided service connection.
 - Optionally sets the **ARGOCD_OPTS** variable for extra configuration.
 

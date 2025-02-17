@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/Microsoft/azure-pipelines-task-lib/master/tasks.schema.json",
   "id": "bf9f5d10-e985-11ef-80f2-00155de5031d",
   "name": "ArgoCDInstaller",
-  "friendlyName": "ArgoCD CLI Installer",
+  "friendlyName": "Argo CD CLI Installer",
   "description": "Install ArgoCD CLI",
   "helpMarkDown": "https://github.com/bonddim/argocd-azure-devops-task",
   "category": "Utility",
@@ -10,7 +10,7 @@
   "version": {
     "Major": 0,
     "Minor": 1,
-    "Patch": 0
+    "Patch": 1
   },
   "minimumAgentVersion": "3.232.1",
   "instanceNameFormat": "Install ArgoCD CLI",
