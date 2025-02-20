@@ -35,8 +35,9 @@ stages:
         dependsOn: publish
         timeoutInMinutes: 60
         variables:
-          Extension.Version: $[ dependencies.publish.outputs['Extension.Version'] ]
+          Extension.Version: $[ dependencies.publish.outputs['QueryVersion.Extension.Version'] ]
         steps:
+          - checkout: none
           - bash: |
               echo "Check if the extension is published"
               echo "Extension version: $(Extension.Version)"
@@ -47,7 +48,7 @@ stages:
         timeoutInMinutes: 60
         pool: server
         variables:
-          Extension.Version: $[ dependencies.publish.outputs['Extension.Version'] ]
+          Extension.Version: $[ dependencies.publish.outputs['QueryVersion.Extension.Version'] ]
         steps:
           - task: InvokeRESTAPI@1
             retryCountOnTaskFailure: 3

@@ -37,6 +37,7 @@ jobs:
           version: "v0.x"
 
       - task: QueryAzureDevOpsExtensionVersion@5
+        name: QueryVersion
         inputs:
           connectTo: "VsTeam"
           connectedServiceName: "https://marketplace.visualstudio.com"
