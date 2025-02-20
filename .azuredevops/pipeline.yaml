@@ -26,9 +26,9 @@ stages:
       - template: templates/publish.yaml
         parameters:
           publisherId: bonddim
-          extensionId: argocd-installer
+          extensionId: argocd-extension
           extensionTag: "-dev"
-          extensionName: Argo CD CLI Installer (DEV)
+          extensionName: Argo CD CLI Extension (DEV)
           extensionVisibility: private
 
   - stage: Public

@@ -17,7 +17,7 @@ jobs:
           versionSpec: 20.x
 
       - task: Npm@1
-        displayName: Install Node dependencies
+        displayName: Install dependencies
         inputs:
           command: custom
           customCommand: run ci
