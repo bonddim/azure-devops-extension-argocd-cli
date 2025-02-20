@@ -5,17 +5,19 @@ parameters:
 jobs:
   - job: E2E
     dependsOn: wait
+    variables:
+      System.Debug: true
     strategy:
       matrix:
-        linux:
+        Ubuntu:
           imageName: ubuntu-latest
           version: latest
           options: --grpc-web
-        mac:
+        MacOS:
           imageName: macOS-latest
           options: --grpc-web --insecure
           version: ""
-        windows:
+        Windows:
           imageName: windows-latest
           options: --plaintext
           version: v2.13.5

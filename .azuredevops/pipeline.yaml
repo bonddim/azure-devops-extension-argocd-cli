@@ -12,9 +12,6 @@ pr:
 pool:
   vmImage: ubuntu-latest
 
-variables:
-  System.Debug: true
-
 stages:
   - stage: CI
     jobs:
