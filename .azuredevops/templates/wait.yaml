@@ -23,7 +23,7 @@ jobs:
           connectionType: "connectedServiceName"
           serviceConnection: "${{ parameters.orgServiceConnection }}"
           method: "GET"
-          urlSuffix: "/{{ split(variables['System.CollectionUri'], '/')[3] }}/_apis/distributedtask/tasks"
+          urlSuffix: "/${{ split(variables['System.CollectionUri'], '/')[3] }}/_apis/distributedtask/tasks"
           waitForCompletion: "false"
           successCriteria: eq(jsonpath('.value[?(@.name==''${{ parameters.taskName }}'')].contributionVersion')[0], variables['version'])
           headers: '{ "Authorization": "Bearer $(System.AccessToken)" }'
