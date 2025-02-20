@@ -82,3 +82,13 @@ jobs:
               updateTasksVersionType: "patch"
               ${{ if eq(parameters.extensionVisibility, 'private') }}:
                 shareWith: ${{ split(variables['System.CollectionUri'], '/')[3] }}
+
+      - task: InstallAzureDevOpsExtension@5
+        inputs:
+          connectTo: "VsTeam"
+          connectedServiceName: "https://marketplace.visualstudio.com"
+          method: "id"
+          publisherId: ${{ parameters.publisherId }}
+          extensionId: ${{ parameters.extensionId }}
+          extensionTag: ${{ parameters.extensionTag }}
+          accounts: "$(System.CollectionUri)"
