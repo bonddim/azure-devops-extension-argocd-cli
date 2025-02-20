@@ -1,7 +1,7 @@
-import fs from "fs";
-import os from "os";
-import task from "azure-pipelines-task-lib/task";
-import tool from "azure-pipelines-tool-lib/tool";
+import fs = require("fs");
+import os = require("os");
+import task = require("azure-pipelines-task-lib/task");
+import tool = require("azure-pipelines-tool-lib/tool");
 
 const FallbackVersion = "v2.14.1";
 const ReleaseUrl = "https://github.com/argoproj/argo-cd/releases";
