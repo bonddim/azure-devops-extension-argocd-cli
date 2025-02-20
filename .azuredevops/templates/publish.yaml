@@ -85,9 +85,9 @@ jobs:
 
       - bash: |
           az devops extension install \
-            --org $(System.CollectionUri)
+            --org $(System.CollectionUri) \
             --publisher-id ${{ parameters.publisherId }} \
-            --extension-id ${{ parameters.extensionId }}${{ parameters.extensionTag }} \
+            --extension-id ${{ parameters.extensionId }}${{ parameters.extensionTag }}
         displayName: "Install extension"
         continueOnError: true
         env:
