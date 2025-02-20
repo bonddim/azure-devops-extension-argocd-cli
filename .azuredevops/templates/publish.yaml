@@ -83,12 +83,12 @@ jobs:
               ${{ if eq(parameters.extensionVisibility, 'private') }}:
                 shareWith: ${{ split(variables['System.CollectionUri'], '/')[3] }}
 
-      - task: InstallAzureDevOpsExtension@5
-        inputs:
-          connectTo: "VsTeam"
-          connectedServiceName: "https://marketplace.visualstudio.com"
-          method: "id"
-          publisherId: ${{ parameters.publisherId }}
-          extensionId: ${{ parameters.extensionId }}
-          extensionTag: ${{ parameters.extensionTag }}
-          accounts: "$(System.CollectionUri)"
+      - bash: |
+          az devops extension install \
+            --org $(System.CollectionUri)
+            --publisher-id ${{ parameters.publisherId }} \
+            --extension-id ${{ parameters.extensionId }}${{ parameters.extensionTag }} \
+        displayName: "Install extension"
+        continueOnError: true
+        env:
+          AZURE_DEVOPS_EXT_PAT: $(System.AccessToken)
