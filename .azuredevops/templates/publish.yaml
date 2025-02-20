@@ -6,6 +6,7 @@ parameters:
   - { name: extensionPricing, type: string, default: "free" }
   - { name: extensionTag, type: string, default: "" }
   - { name: extensionVisibility, type: string, default: "private" }
+  - { name: taskNameSuffix, type: string, default: "" }
 
 jobs:
   - job: publish
@@ -46,14 +47,14 @@ jobs:
           extensionTag: ${{ parameters.extensionTag }}
           versionAction: "Patch"
 
-      - ${{ if ne(parameters.extensionTag, '') }}:
+      - ${{ if ne(parameters.taskNameSuffix, '') }}:
           - bash: |
               echo "Find all task.json files and update the "name" property in place using yq"
               find . -type f -name "task.json" | while read -r file; do
                 echo "Updating $file"
-                yq eval '.name = (.name + "${{ upper(parameters.extensionTag) }}")' -i "$file"
+                yq eval '.name = (.name + "${{ parameters.taskNameSuffix }}")' -i "$file"
               done
-            displayName: "Update task's names with tag"
+            displayName: "Update task's names with suffix"
 
       - task: PackageAzureDevOpsExtension@5
         inputs:
@@ -66,6 +67,8 @@ jobs:
           extensionVersion: "$(Extension.Version)"
           updateTasksVersion: true
           updateTasksVersionType: "patch"
+          ${{ if eq(parameters.extensionVisibility, 'private') }}:
+            updateTasksId: true
 
       - ${{ if eq(parameters.extensionVisibility, 'private') }}:
           - task: PublishAzureDevOpsExtension@5

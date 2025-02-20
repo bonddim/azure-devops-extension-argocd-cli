@@ -27,38 +27,29 @@ stages:
         parameters:
           publisherId: bonddim
           extensionId: argocd-installer
-          extensionTag: "-dev"
+          extensionTag: -dev
           extensionName: Argo CD CLI Installer (DEV)
           extensionVisibility: private
-
-      - job: check
-        dependsOn: publish
-        timeoutInMinutes: 60
-        variables:
-          Extension.Version: $[ dependencies.publish.outputs['QueryVersion.Extension.Version'] ]
-        steps:
-          - checkout: none
-          - bash: |
-              echo "Check if the extension is published"
-              echo "Extension version: $(Extension.Version)"
-            displayName: "Check if the extension is published"
+          taskNameSuffix: Dev
 
       - job: wait
-        dependsOn: [publish, check]
+        displayName: "Wait for the extension"
+        dependsOn: publish
         timeoutInMinutes: 60
         pool: server
         variables:
-          Extension.Version: $[ dependencies.publish.outputs['QueryVersion.Extension.Version'] ]
+          version: $[ dependencies.publish.outputs['QueryVersion.Extension.Version'] ]
         steps:
           - task: InvokeRESTAPI@1
+            displayName: "Wait for the extension version to be available"
             retryCountOnTaskFailure: 3
             inputs:
               connectionType: "connectedServiceName"
               serviceConnection: "https://dev.azure.com"
               method: "GET"
-              urlSuffix: "/bonddim/_apis/distributedtask/tasks/bf9f5d10-e985-11ef-80f2-00155de5031d"
+              urlSuffix: "/bonddim/_apis/distributedtask/tasks"
               waitForCompletion: "false"
-              successCriteria: eq(jsonpath('.value[0].contributionVersion')[0], variables['Extension.Version'])
+              successCriteria: eq(jsonpath('.value[?(@.name=="ArgoCDInstallerDev")].contributionVersion')[0], variables['version'])
               headers: |
                 {
                   "Authorization": "Bearer $(System.AccessToken)"
