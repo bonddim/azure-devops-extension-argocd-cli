@@ -8,7 +8,7 @@ parameters:
   - { name: extensionVisibility, type: string, default: "private" }
 
 jobs:
-  - job:
+  - job: publish
     displayName: "Publish ${{ parameters.extensionVisibility }}"
     steps:
       - task: NodeTool@0
