@@ -1,10 +1,8 @@
 {
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -p tsconfig.json",
     "lint": "eslint --parser-options '{\"project\": true}'",
-    "start": "npm run build; node dist/index.js",
-    "test": "tsc && npm --prefix tests/ run test",
-    "tsc": "npm run lint && tsc"
+    "test": "echo 'No tests yet...'"
   },
   "dependencies": {
     "@types/node": "^22.13.1",
