@@ -1,7 +1,7 @@
-import fs = require("fs");
-import os = require("os");
-import task = require("azure-pipelines-task-lib/task");
-import tool = require("azure-pipelines-tool-lib/tool");
+import fs from "fs";
+import os from "os";
+import task from "azure-pipelines-task-lib/task";
+import tool from "azure-pipelines-tool-lib/tool";
 
 const FallbackVersion = "v2.14.1";
 const ReleaseUrl = "https://github.com/argoproj/argo-cd/releases";
@@ -28,8 +28,12 @@ async function run() {
     }
     task.execSync(ToolName, "version --client");
 
-  } catch (err: any) {
-    task.setResult(task.TaskResult.Failed, err.message);
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      task.setResult(task.TaskResult.Failed, err.message);
+    } else {
+      task.setResult(task.TaskResult.Failed, JSON.stringify(err));
+    }
   }
 }
 
