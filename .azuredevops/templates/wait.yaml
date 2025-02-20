@@ -1,0 +1,29 @@
+---
+parameters:
+  # Azure DevOps organization service connection. URL should be in the format https://dev.azure.com
+  - { name: orgServiceConnection, type: string, default: "" }
+  # Task name to lookup the updated version
+  - { name: taskName, type: string, default: "" }
+  # Number of retries to perform the lookup
+  - { name: retryCount, type: number, default: 5 }
+
+jobs:
+  - job: wait
+    displayName: "Wait for the extension"
+    dependsOn: publish
+    timeoutInMinutes: 60
+    pool: server
+    variables:
+      version: $[ dependencies.publish.outputs['QueryVersion.Extension.Version'] ]
+    steps:
+      - task: InvokeRESTAPI@1
+        displayName: "Wait for the updated task to be available"
+        retryCountOnTaskFailure: ${{ parameters.retryCount }}
+        inputs:
+          connectionType: "connectedServiceName"
+          serviceConnection: "${{ parameters.orgServiceConnection }}"
+          method: "GET"
+          urlSuffix: "/{{ split(variables['System.CollectionUri'], '/')[3] }}/_apis/distributedtask/tasks"
+          waitForCompletion: "false"
+          successCriteria: eq(jsonpath('.value[?(@.name==''${{ parameters.taskName }}'')].contributionVersion')[0], variables['version'])
+          headers: '{ "Authorization": "Bearer $(System.AccessToken)" }'

@@ -32,28 +32,38 @@ stages:
           extensionVisibility: private
           taskNameSuffix: Dev
 
-      - job: wait
-        displayName: "Wait for the extension"
-        dependsOn: publish
-        timeoutInMinutes: 60
-        pool: server
-        variables:
-          version: $[ dependencies.publish.outputs['QueryVersion.Extension.Version'] ]
+      - template: templates/wait.yaml
+        parameters:
+          orgServiceConnection: https://dev.azure.com
+          taskName: ArgoCDInstallerDev
+          retryCount: 5
+
+  - stage: E2E
+    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+    jobs:
+      - job: E2E
+        strategy:
+          matrix:
+            linux:
+              imageName: ubuntu-latest
+              version: latest
+              options: --grpc-web
+            mac:
+              imageName: macOS-latest
+              options: --grpc-web --insecure
+              version: ""
+            windows:
+              imageName: windows-latest
+              options: --plaintext
+              version: v2.13.5
+        pool:
+          vmImage: $(imageName)
         steps:
-          - task: InvokeRESTAPI@1
-            displayName: "Wait for the extension version to be available"
-            retryCountOnTaskFailure: 3
+          - checkout: none
+          - task: ArgoCDInstallerDev@0
             inputs:
-              connectionType: "connectedServiceName"
-              serviceConnection: "https://dev.azure.com"
-              method: "GET"
-              urlSuffix: "/bonddim/_apis/distributedtask/tasks"
-              waitForCompletion: "false"
-              successCriteria: eq(jsonpath('.value[?(@.name==''ArgoCDInstallerDev'')].contributionVersion')[0], variables['version'])
-              headers: |
-                {
-                  "Authorization": "Bearer $(System.AccessToken)"
-                }
+              version: $(version)
+              options: $(options)
 
   - stage: Public
     # condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
