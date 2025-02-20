@@ -45,7 +45,7 @@ jobs:
 
       - bash: |
           cat vss-extension.json
-          cat ${{ parameters.taskDir }}/task.json
+          cat installer/task.json
 
       - task: PackageAzureDevOpsExtension@5
         inputs:
@@ -62,7 +62,7 @@ jobs:
 
       - bash: |
           cat vss-extension.json
-          cat ${{ parameters.taskDir }}/task.json
+          cat installer/task.json
 
       - task: PublishAzureDevOpsExtension@5
         enabled: false
