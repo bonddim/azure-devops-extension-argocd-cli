@@ -49,7 +49,7 @@ stages:
               method: "GET"
               urlSuffix: "/bonddim/_apis/distributedtask/tasks"
               waitForCompletion: "false"
-              successCriteria: eq(jsonpath('.value[?(@.name=="ArgoCDInstallerDev")].contributionVersion')[0], variables['version'])
+              successCriteria: eq(jsonpath('.value[?(@.name==''ArgoCDInstallerDev'')].contributionVersion')[0], variables['version'])
               headers: |
                 {
                   "Authorization": "Bearer $(System.AccessToken)"
