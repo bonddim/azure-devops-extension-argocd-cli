@@ -43,40 +43,40 @@ jobs:
           extensionTag: ${{ parameters.extensionTag }}
           versionAction: "Patch"
 
-      - bash: |
-          cat vss-extension.json
-          cat installer/task.json
+      - ${{ if ne(parameters.extensionTag, '') }}:
+          - bash: |
+              echo "Find all task.json files and update the "name" property in place using yq"
+              find . -type f -name "task.json" | while read -r file; do
+                echo "Updating $file"
+                yq eval '.name = (.name + "${{ upper(parameters.extensionTag) }}")' -i "$file"
+              done
+            displayName: "Update task's names with tag"
 
       - task: PackageAzureDevOpsExtension@5
         inputs:
-          extensionId: ${{ parameters.extensionId }}
-          extensionName: ${{ parameters.extensionName }}
-          extensionPricing: ${{ parameters.extensionPricing }}
-          extensionTag: ${{ parameters.extensionTag }}
+          publisherId: "${{ parameters.publisherId }}"
+          extensionId: "${{ parameters.extensionId }}"
+          extensionTag: "${{ parameters.extensionTag }}"
+          extensionName: "${{ parameters.extensionName }}"
+          extensionVisibility: "${{ parameters.extensionVisibility }}"
+          extensionPricing: "${{ parameters.extensionPricing }}"
           extensionVersion: "$(Extension.Version)"
-          extensionVisibility: ${{ parameters.extensionVisibility }}
-          publisherId: ${{ parameters.publisherId }}
-          updateTasksId: true
           updateTasksVersion: true
           updateTasksVersionType: "patch"
 
-      - bash: |
-          cat vss-extension.json
-          cat installer/task.json
-
-      - task: PublishAzureDevOpsExtension@5
-        enabled: false
-        inputs:
-          connectTo: "VsTeam"
-          connectedServiceName: "https://marketplace.visualstudio.com"
-          fileType: "manifest"
-          publisherId: ${{ parameters.publisherId }}
-          extensionId: ${{ parameters.extensionId }}
-          extensionName: ${{ parameters.extensionName }}
-          extensionPricing: ${{ parameters.extensionPricing }}
-          extensionTag: ${{ parameters.extensionTag }}
-          extensionVersion: "$(Extension.Version)"
-          extensionVisibility: ${{ parameters.extensionVisibility }}
-          updateTasksId: true
-          updateTasksVersionType: "patch"
-          updateTasksVersion: true
+      - ${{ if eq(parameters.extensionVisibility, 'private') }}:
+          - task: PublishAzureDevOpsExtension@5
+            inputs:
+              connectTo: "VsTeam"
+              connectedServiceName: "https://marketplace.visualstudio.com"
+              fileType: "manifest"
+              publisherId: ${{ parameters.publisherId }}
+              extensionId: ${{ parameters.extensionId }}
+              extensionTag: ${{ parameters.extensionTag }}
+              extensionName: ${{ parameters.extensionName }}
+              extensionPricing: ${{ parameters.extensionPricing }}
+              extensionVisibility: ${{ parameters.extensionVisibility }}
+              extensionVersion: "$(Extension.Version)"
+              updateTasksId: false
+              updateTasksVersion: true
+              updateTasksVersionType: "patch"
