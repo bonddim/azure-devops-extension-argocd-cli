@@ -39,7 +39,7 @@ jobs:
           connectTo: "VsTeam"
           connectedServiceName: "https://marketplace.visualstudio.com"
           publisherId: ${{ parameters.publisherId }}
-          extensionId: ${{ parameters.extensionId }}
+          extensionId: argocd-installer
           extensionTag: ${{ parameters.extensionTag }}
           versionAction: "Patch"
 
@@ -80,3 +80,5 @@ jobs:
               updateTasksId: false
               updateTasksVersion: true
               updateTasksVersionType: "patch"
+              ${{ if eq(parameters.extensionVisibility, 'private') }}:
+                shareWith: ${{ split(variables['System.CollectionUri'], '/')[3] }}
