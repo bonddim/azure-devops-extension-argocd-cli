@@ -1,0 +1,38 @@
+---
+trigger:
+  batch: true
+  branches:
+    include:
+      - main
+      - feature/*
+
+pr:
+  - main
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+  - stage: CI
+    jobs:
+      - template: templates/ci.yaml
+
+  - stage: Private
+    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+    jobs:
+      - template: templates/publish.yaml
+        parameters:
+          publisherId: bonddim
+          extensionId: argocd-installer
+          extensionTag: "-dev"
+          extensionName: Argo CD CLI Installer (DEV)
+          extensionVisibility: private
+
+  - stage: Public
+    # condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    jobs:
+      - template: templates/publish.yaml
+        parameters:
+          publisherId: bonddim
+          extensionName: Argo CD CLI Installer
+          extensionVisibility: public

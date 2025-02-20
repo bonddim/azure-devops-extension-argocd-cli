@@ -1,0 +1,82 @@
+---
+parameters:
+  - { name: publisherId, type: string, default: "" }
+  - { name: extensionId, type: string, default: "" }
+  - { name: extensionName, type: string, default: "" }
+  - { name: extensionPricing, type: string, default: "free" }
+  - { name: extensionTag, type: string, default: "" }
+  - { name: extensionVisibility, type: string, default: "private" }
+
+jobs:
+  - job:
+    displayName: "Publish ${{ parameters.extensionVisibility }}"
+    steps:
+      - task: NodeTool@0
+        inputs:
+          versionSource: spec
+          versionSpec: 20.x
+
+      - task: Npm@1
+        displayName: Install Node dependencies
+        inputs:
+          command: custom
+          customCommand: run ci
+        env:
+          NODE_ENV: production
+
+      - task: Npm@1
+        displayName: Run build
+        inputs:
+          command: custom
+          customCommand: run build
+
+      - task: TfxInstaller@5
+        inputs:
+          version: "v0.x"
+
+      - task: QueryAzureDevOpsExtensionVersion@5
+        inputs:
+          connectTo: "VsTeam"
+          connectedServiceName: "https://marketplace.visualstudio.com"
+          publisherId: ${{ parameters.publisherId }}
+          extensionId: ${{ parameters.extensionId }}
+          extensionTag: ${{ parameters.extensionTag }}
+          versionAction: "Patch"
+
+      - bash: |
+          cat vss-extension.json
+          cat ${{ parameters.taskDir }}/task.json
+
+      - task: PackageAzureDevOpsExtension@5
+        inputs:
+          extensionId: ${{ parameters.extensionId }}
+          extensionName: ${{ parameters.extensionName }}
+          extensionPricing: ${{ parameters.extensionPricing }}
+          extensionTag: ${{ parameters.extensionTag }}
+          extensionVersion: "$(Extension.Version)"
+          extensionVisibility: ${{ parameters.extensionVisibility }}
+          publisherId: ${{ parameters.publisherId }}
+          updateTasksId: true
+          updateTasksVersion: true
+          updateTasksVersionType: "patch"
+
+      - bash: |
+          cat vss-extension.json
+          cat ${{ parameters.taskDir }}/task.json
+
+      - task: PublishAzureDevOpsExtension@5
+        enabled: false
+        inputs:
+          connectTo: "VsTeam"
+          connectedServiceName: "https://marketplace.visualstudio.com"
+          fileType: "manifest"
+          publisherId: ${{ parameters.publisherId }}
+          extensionId: ${{ parameters.extensionId }}
+          extensionName: ${{ parameters.extensionName }}
+          extensionPricing: ${{ parameters.extensionPricing }}
+          extensionTag: ${{ parameters.extensionTag }}
+          extensionVersion: "$(Extension.Version)"
+          extensionVisibility: ${{ parameters.extensionVisibility }}
+          updateTasksId: true
+          updateTasksVersionType: "patch"
+          updateTasksVersion: true
