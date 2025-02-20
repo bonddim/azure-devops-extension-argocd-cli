@@ -2,10 +2,12 @@
 parameters:
   # Azure DevOps organization service connection. URL should be in the format https://dev.azure.com
   - { name: orgServiceConnection, type: string, default: "" }
-  # Task name to lookup the updated version
+  # Task name to lookup for the updated version. One of taskName or taskId should be provided
   - { name: taskName, type: string, default: "" }
+  # Task ID to lookup for the updated version. One of taskName or taskId should be provided
+  - { name: taskId, type: string, default: "" }
   # Number of retries to perform the lookup
-  - { name: retryCount, type: number, default: 5 }
+  - { name: retryCount, type: number, default: 10 }
 
 jobs:
   - job: wait
@@ -23,7 +25,13 @@ jobs:
           connectionType: "connectedServiceName"
           serviceConnection: "${{ parameters.orgServiceConnection }}"
           method: "GET"
-          urlSuffix: "/${{ split(variables['System.CollectionUri'], '/')[3] }}/_apis/distributedtask/tasks"
+          urlSuffix: "/${{ split(variables['System.CollectionUri'], '/')[3] }}/_apis/distributedtask/tasks/${{ parameters.taskId }}"
           waitForCompletion: "false"
-          successCriteria: eq(jsonpath('.value[?(@.name==''${{ parameters.taskName }}'')].contributionVersion')[0], variables['version'])
           headers: '{ "Authorization": "Bearer $(System.AccessToken)" }'
+          ${{ if ne(parameters.taskId, '') }}:
+            successCriteria: eq(jsonpath('.value[0].contributionVersion')[0], variables['version'])
+          ${{ elseif ne(parameters.taskName, '') }}:
+            successCriteria: eq(jsonpath('.value[?(@.name==''${{ parameters.taskName }}'')].contributionVersion')[0], variables['version'])
+          ${{ else }}:
+            # Fail the task if either taskName or taskId is not provided
+            successCriteria: eq(false, true)

@@ -57,35 +57,20 @@ jobs:
               done
             displayName: "Update task's names with suffix"
 
-      - task: PackageAzureDevOpsExtension@5
+      - task: PublishAzureDevOpsExtension@5
         inputs:
-          publisherId: "${{ parameters.publisherId }}"
-          extensionId: "${{ parameters.extensionId }}"
-          extensionTag: "${{ parameters.extensionTag }}"
-          extensionName: "${{ parameters.extensionName }}"
-          extensionVisibility: "${{ parameters.extensionVisibility }}"
-          extensionPricing: "${{ parameters.extensionPricing }}"
+          connectTo: "VsTeam"
+          connectedServiceName: "https://marketplace.visualstudio.com"
+          fileType: "manifest"
+          publisherId: ${{ parameters.publisherId }}
+          extensionId: ${{ parameters.extensionId }}
+          extensionTag: ${{ parameters.extensionTag }}
+          extensionName: ${{ parameters.extensionName }}
+          extensionPricing: ${{ parameters.extensionPricing }}
+          extensionVisibility: ${{ parameters.extensionVisibility }}
           extensionVersion: "$(Extension.Version)"
           updateTasksVersion: true
           updateTasksVersionType: "patch"
           ${{ if eq(parameters.extensionVisibility, 'private') }}:
+            shareWith: ${{ split(variables['System.CollectionUri'], '/')[3] }}
             updateTasksId: true
-
-      - ${{ if eq(parameters.extensionVisibility, 'private') }}:
-          - task: PublishAzureDevOpsExtension@5
-            inputs:
-              connectTo: "VsTeam"
-              connectedServiceName: "https://marketplace.visualstudio.com"
-              fileType: "manifest"
-              publisherId: ${{ parameters.publisherId }}
-              extensionId: ${{ parameters.extensionId }}
-              extensionTag: ${{ parameters.extensionTag }}
-              extensionName: ${{ parameters.extensionName }}
-              extensionPricing: ${{ parameters.extensionPricing }}
-              extensionVisibility: ${{ parameters.extensionVisibility }}
-              extensionVersion: "$(Extension.Version)"
-              updateTasksId: false
-              updateTasksVersion: true
-              updateTasksVersionType: "patch"
-              ${{ if eq(parameters.extensionVisibility, 'private') }}:
-                shareWith: ${{ split(variables['System.CollectionUri'], '/')[3] }}

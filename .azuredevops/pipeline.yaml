@@ -35,42 +35,28 @@ stages:
       - template: templates/wait.yaml
         parameters:
           orgServiceConnection: https://dev.azure.com
+          taskId: 07a3bd28-ae51-5e61-a7b3-6226fcd60701
           taskName: ArgoCDInstallerDev
-          retryCount: 5
 
-  - stage: E2E
-    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
-    jobs:
-      - job: E2E
-        strategy:
-          matrix:
-            linux:
-              imageName: ubuntu-latest
-              version: latest
-              options: --grpc-web
-            mac:
-              imageName: macOS-latest
-              options: --grpc-web --insecure
-              version: ""
-            windows:
-              imageName: windows-latest
-              options: --plaintext
-              version: v2.13.5
-        pool:
-          vmImage: $(imageName)
-        steps:
-          - checkout: none
-          - task: ArgoCDInstallerDev@0
-            inputs:
-              version: $(version)
-              options: $(options)
+      - template: templates/e2e.yaml
+        parameters:
+          extensionVisibility: private
 
   - stage: Public
-    # condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
     jobs:
       - template: templates/publish.yaml
         parameters:
           publisherId: bonddim
           extensionId: argocd-installer
           extensionName: Argo CD CLI Installer
+          extensionVisibility: public
+
+      - template: templates/wait.yaml
+        parameters:
+          orgServiceConnection: https://dev.azure.com
+          taskId: bf9f5d10-e985-11ef-80f2-00155de5031d
+
+      - template: templates/e2e.yaml
+        parameters:
           extensionVisibility: public

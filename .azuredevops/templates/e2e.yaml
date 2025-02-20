@@ -1,0 +1,36 @@
+---
+parameters:
+  - { name: extensionVisibility, type: string, default: "" }
+
+jobs:
+  - job: E2E
+    dependsOn: wait
+    strategy:
+      matrix:
+        linux:
+          imageName: ubuntu-latest
+          version: latest
+          options: --grpc-web
+        mac:
+          imageName: macOS-latest
+          options: --grpc-web --insecure
+          version: ""
+        windows:
+          imageName: windows-latest
+          options: --plaintext
+          version: v2.13.5
+    pool:
+      vmImage: $(imageName)
+    steps:
+      - checkout: none
+      - ${{ if eq(parameters.extensionVisibility, 'private') }}:
+          - task: ArgoCDInstallerDev@0
+            inputs:
+              version: $(version)
+              options: $(options)
+
+      - ${{ if eq(parameters.extensionVisibility, 'public') }}:
+          - task: ArgoCDInstaller@0
+            inputs:
+              version: $(version)
+              options: $(options)
