@@ -43,5 +43,19 @@
     "Node20_1": {
       "target": "dist/index.js"
     }
-  }
+  },
+  "outputVariables": [
+    {
+      "name": "ARGOCD_SERVER",
+      "description": "Argo CD Server URL without protocol, if connection is provided."
+    },
+    {
+      "name": "ARGOCD_AUTH_TOKEN",
+      "description": "Argo CD Auth Token, if connection is provided."
+    },
+    {
+      "name": "ARGOCD_OPTS",
+      "description": "Argo CD CLI Options, if options are provided."
+    }
+  ]
 }
