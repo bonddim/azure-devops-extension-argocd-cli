@@ -53,6 +53,7 @@ jobs:
               find . -type f -name "task.json" | while read -r file; do
                 echo "Updating $file"
                 yq eval '.name = (.name + "${{ parameters.taskNameSuffix }}")' -i "$file"
+                yq eval '.friendlyName = (.friendlyName + " ${{ parameters.taskNameSuffix }}")' -i "$file"
               done
             displayName: "Update task's names with suffix"
 
