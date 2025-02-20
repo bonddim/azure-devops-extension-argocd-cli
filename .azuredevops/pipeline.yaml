@@ -53,7 +53,7 @@ stages:
             retryCountOnTaskFailure: 3
             inputs:
               connectionType: "connectedServiceName"
-              serviceConnection: "dev.azure.com"
+              serviceConnection: "https://dev.azure.com"
               method: "GET"
               urlSuffix: "/bonddim/_apis/distributedtask/tasks/bf9f5d10-e985-11ef-80f2-00155de5031d"
               waitForCompletion: "false"
