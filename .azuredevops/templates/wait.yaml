@@ -1,7 +1,7 @@
 ---
 parameters:
-  # Azure DevOps organization service connection. URL should be in the format https://dev.azure.com
-  - { name: orgServiceConnection, type: string, default: "" }
+  # Azure DevOps organization generic service connection. URL should be in the format https://dev.azure.com/organization
+  - { name: organizationConnection, type: string, default: "" }
   # Task name to lookup for the updated version. One of taskName or taskId should be provided
   - { name: taskName, type: string, default: "" }
   # Task ID to lookup for the updated version. One of taskName or taskId should be provided
@@ -23,9 +23,9 @@ jobs:
         retryCountOnTaskFailure: ${{ parameters.retryCount }}
         inputs:
           connectionType: "connectedServiceName"
-          serviceConnection: "${{ parameters.orgServiceConnection }}"
+          serviceConnection: "${{ parameters.organizationConnection }}"
           method: "GET"
-          urlSuffix: "/${{ split(variables['System.CollectionUri'], '/')[3] }}/_apis/distributedtask/tasks/${{ parameters.taskId }}"
+          urlSuffix: "/_apis/distributedtask/tasks/${{ parameters.taskId }}"
           waitForCompletion: "false"
           headers: '{ "Authorization": "Bearer $(System.AccessToken)" }'
           ${{ if ne(parameters.taskId, '') }}:

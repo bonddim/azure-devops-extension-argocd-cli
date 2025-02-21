@@ -22,6 +22,7 @@ stages:
     jobs:
       - template: templates/publish.yaml
         parameters:
+          marketplaceConnection: e5af4fa9-9ce8-48be-88bf-ad06b71c2017
           publisherId: bonddim
           extensionId: argocd-installer
           extensionTag: -dev
@@ -31,7 +32,7 @@ stages:
 
       - template: templates/wait.yaml
         parameters:
-          orgServiceConnection: https://dev.azure.com
+          organizationConnection: 2f23d378-bcdb-4206-b7aa-e062138a0e4a
           taskName: ArgoCDInstallerDev
 
       - template: templates/e2e.yaml
@@ -43,6 +44,7 @@ stages:
     jobs:
       - template: templates/publish.yaml
         parameters:
+          marketplaceConnection: e5af4fa9-9ce8-48be-88bf-ad06b71c2017
           publisherId: bonddim
           extensionId: argocd-installer
           extensionName: Argo CD CLI Installer
@@ -50,7 +52,7 @@ stages:
 
       - template: templates/wait.yaml
         parameters:
-          orgServiceConnection: https://dev.azure.com
+          organizationConnection: 2f23d378-bcdb-4206-b7aa-e062138a0e4a
           taskId: bf9f5d10-e985-11ef-80f2-00155de5031d
 
       - template: templates/e2e.yaml
@@ -65,7 +67,7 @@ stages:
           - checkout: none
           - task: GitHubRelease@1
             inputs:
-              gitHubConnection: bonddim
+              gitHubConnection: 6de9605e-eb3c-4e78-8ef0-41ea94aa7918
               repositoryName: $(Build.Repository.Name)
               action: create
               target: $(Build.SourceVersion)

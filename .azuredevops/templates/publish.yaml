@@ -1,5 +1,6 @@
 ---
 parameters:
+  - { name: marketplaceConnection, type: string, default: "" }
   - { name: publisherId, type: string, default: "" }
   - { name: extensionId, type: string, default: "" }
   - { name: extensionName, type: string, default: "" }
@@ -41,7 +42,7 @@ jobs:
         continueOnError: true
         inputs:
           connectTo: "VsTeam"
-          connectedServiceName: "https://marketplace.visualstudio.com"
+          connectedServiceName: ${{ parameters.marketplaceConnection }}
           publisherId: ${{ parameters.publisherId }}
           extensionId: ${{ parameters.extensionId }}
           extensionTag: ${{ parameters.extensionTag }}
@@ -71,7 +72,7 @@ jobs:
       - task: PublishAzureDevOpsExtension@5
         inputs:
           connectTo: "VsTeam"
-          connectedServiceName: "https://marketplace.visualstudio.com"
+          connectedServiceName: ${{ parameters.marketplaceConnection }}
           fileType: "manifest"
           publisherId: ${{ parameters.publisherId }}
           extensionId: ${{ parameters.extensionId }}
