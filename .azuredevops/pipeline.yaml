@@ -33,7 +33,7 @@ stages:
       - template: templates/wait.yaml
         parameters:
           organizationConnection: 2f23d378-bcdb-4206-b7aa-e062138a0e4a
-          taskName: ArgoCDInstallerDev
+          taskId: 07a3bd28-ae51-5e61-a7b3-6226fcd60701
 
       - template: templates/e2e.yaml
         parameters:
