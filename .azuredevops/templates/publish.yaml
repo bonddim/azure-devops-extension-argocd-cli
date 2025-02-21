@@ -82,6 +82,17 @@ jobs:
           extensionVisibility: ${{ parameters.extensionVisibility }}
           extensionVersion: "$(Extension.Version)"
           updateTasksVersion: true
+          noWaitValidation: true
           ${{ if eq(parameters.extensionVisibility, 'private') }}:
             shareWith: ${{ split(variables['System.CollectionUri'], '/')[3] }}
             updateTasksId: true
+
+      - task: IsAzureDevOpsExtensionValid@5
+        inputs:
+          connectTo: "VsTeam"
+          connectedServiceName: ${{ parameters.marketplaceConnection }}
+          method: "id"
+          publisherId: ${{ parameters.publisherId }}
+          extensionId: ${{ parameters.extensionId }}
+          extensionTag: ${{ parameters.extensionTag }}
+          extensionVersion: "$(Extension.Version)"
