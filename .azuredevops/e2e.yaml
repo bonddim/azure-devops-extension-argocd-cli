@@ -5,6 +5,9 @@ resources:
       source: bonddim.argocd-azure-devops-task-ci
       trigger: true
 
+trigger: none
+pr: none
+
 variables:
   System.Debug: true
 
