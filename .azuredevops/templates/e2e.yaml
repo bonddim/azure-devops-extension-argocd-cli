@@ -1,6 +1,6 @@
 ---
 parameters:
-  - { name: extensionVisibility, type: string, default: "" }
+  - { name: type, type: string, default: "" }
 
 jobs:
   - job: E2E
@@ -25,13 +25,13 @@ jobs:
       vmImage: $(imageName)
     steps:
       - checkout: none
-      - ${{ if eq(parameters.extensionVisibility, 'private') }}:
+      - ${{ if eq(parameters.type, 'private') }}:
           - task: ArgoCDInstallerDev@0
             inputs:
               version: $(version)
               options: $(options)
 
-      - ${{ if eq(parameters.extensionVisibility, 'public') }}:
+      - ${{ if eq(parameters.type, 'public') }}:
           - task: ArgoCDInstaller@0
             inputs:
               version: $(version)
