@@ -1,0 +1,33 @@
+---
+resources:
+  pipelines:
+    - pipeline: ci
+      source: bonddim.argocd-azure-devops-task-ci
+      trigger: true
+
+variables:
+  System.Debug: true
+
+strategy:
+  matrix:
+    Ubuntu:
+      imageName: ubuntu-latest
+      version: latest
+      options: --grpc-web
+    MacOS:
+      imageName: macOS-latest
+      options: --grpc-web --insecure
+      version: ""
+    Windows:
+      imageName: windows-latest
+      options: --plaintext
+      version: v2.13.5
+pool:
+  vmImage: $(imageName)
+
+steps:
+  - checkout: none
+  - task: ArgoCDInstallerDev@0
+    inputs:
+      version: $(version)
+      options: $(options)

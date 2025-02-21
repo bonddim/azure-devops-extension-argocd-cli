@@ -1,7 +1,6 @@
 ---
 jobs:
-  - job:
-    displayName: CI
+  - job: CI
     steps:
       - task: NodeTool@0
         inputs:
