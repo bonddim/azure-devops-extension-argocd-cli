@@ -8,6 +8,7 @@ parameters:
   - { name: taskId, type: string, default: "" }
   # Number of retries to perform the lookup
   - { name: retryCount, type: number, default: 10 }
+  - { name: delayForMinutes, type: number, default: 2 }
 
 jobs:
   - job: wait
@@ -16,8 +17,13 @@ jobs:
     timeoutInMinutes: 60
     pool: server
     variables:
+      System.Debug: true
       version: $[ dependencies.publish.outputs['QueryVersion.Extension.Version'] ]
     steps:
+      - task: Delay@1
+        inputs:
+          delayForMinutes: ${{ parameters.delayMinutes }}
+
       - task: InvokeRESTAPI@1
         displayName: "Wait for the updated task to be available"
         retryCountOnTaskFailure: ${{ parameters.retryCount }}
