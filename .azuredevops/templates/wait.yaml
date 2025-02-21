@@ -22,7 +22,7 @@ jobs:
     steps:
       - task: Delay@1
         inputs:
-          delayForMinutes: ${{ parameters.delayMinutes }}
+          delayForMinutes: ${{ parameters.delayForMinutes }}
 
       - task: InvokeRESTAPI@1
         displayName: "Wait for the updated task to be available"
