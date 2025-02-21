@@ -12,7 +12,7 @@ parameters:
 
 jobs:
   - job: wait
-    displayName: "Wait for the extension"
+    displayName: Wait
     dependsOn: publish
     timeoutInMinutes: 60
     pool: server
