@@ -38,14 +38,25 @@ jobs:
           version: "v0.x"
 
       - task: QueryAzureDevOpsExtensionVersion@5
-        name: QueryVersion
+        continueOnError: true
         inputs:
           connectTo: "VsTeam"
           connectedServiceName: "https://marketplace.visualstudio.com"
           publisherId: ${{ parameters.publisherId }}
-          extensionId: argocd-installer
+          extensionId: ${{ parameters.extensionId }}
           extensionTag: ${{ parameters.extensionTag }}
           versionAction: "Patch"
+
+      - bash: |
+          version=$(Extension.Version)
+          if [ "$AGENT_JOBSTATUS" = "SucceededWithIssues" ]; then
+            echo "Fallback to the version from the manifest"
+            version=$(jq -r '.version' vss-extension.json)
+          fi
+          echo "##vso[task.setvariable variable=Extension.Version;isOutput=false;issecret=false;]$version"
+          echo "##vso[task.setvariable variable=Extension.Version;isOutput=true;issecret=false;]$version"
+        displayName: "Fallback version from manifest"
+        name: QueryVersion
 
       - ${{ if ne(parameters.taskNameSuffix, '') }}:
           - bash: |
@@ -70,7 +81,6 @@ jobs:
           extensionVisibility: ${{ parameters.extensionVisibility }}
           extensionVersion: "$(Extension.Version)"
           updateTasksVersion: true
-          updateTasksVersionType: "patch"
           ${{ if eq(parameters.extensionVisibility, 'private') }}:
             shareWith: ${{ split(variables['System.CollectionUri'], '/')[3] }}
             updateTasksId: true

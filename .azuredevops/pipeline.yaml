@@ -32,7 +32,6 @@ stages:
       - template: templates/wait.yaml
         parameters:
           orgServiceConnection: https://dev.azure.com
-          taskId: 07a3bd28-ae51-5e61-a7b3-6226fcd60701
           taskName: ArgoCDInstallerDev
 
       - template: templates/e2e.yaml
