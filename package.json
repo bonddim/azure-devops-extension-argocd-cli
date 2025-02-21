@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "build": "npm --prefix installer run build",
+    "ci": "npm --prefix installer ci --no-fund",
+    "install": "npm --prefix installer install --no-fund",
+    "lint": "npm --prefix installer run lint",
+    "test": "npm --prefix installer test"
+  }
+}

@@ -1,0 +1,36 @@
+---
+jobs:
+  - job: CI
+    steps:
+      - task: NodeTool@0
+        inputs:
+          versionSource: spec
+          versionSpec: 20.x
+
+      - task: Npm@1
+        displayName: Install dependencies
+        inputs:
+          command: custom
+          customCommand: run ci
+          verbose: false
+
+      - task: Npm@1
+        displayName: Run lint
+        inputs:
+          command: custom
+          customCommand: run lint
+          verbose: false
+
+      - task: Npm@1
+        displayName: Run build
+        inputs:
+          command: custom
+          customCommand: run build
+          verbose: false
+
+      - task: Npm@1
+        displayName: Run test
+        inputs:
+          command: custom
+          customCommand: run test
+          verbose: false

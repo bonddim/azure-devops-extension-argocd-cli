@@ -1,0 +1,36 @@
+---
+trigger:
+  batch: true
+  branches:
+    include:
+      - main
+      - feature/*
+
+pr:
+  - main
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+  - stage: CI
+    jobs:
+      - template: templates/ci.yaml
+
+  - stage: Private
+    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+    jobs:
+      - template: templates/publish.yaml
+        parameters:
+          marketplaceConnection: e5af4fa9-9ce8-48be-88bf-ad06b71c2017
+          publisherId: bonddim
+          extensionId: argocd-installer
+          extensionTag: -dev
+          extensionName: Argo CD CLI Installer (DEV)
+          extensionVisibility: private
+          taskNameSuffix: Dev
+
+      - template: templates/wait.yaml
+        parameters:
+          organizationConnection: 2f23d378-bcdb-4206-b7aa-e062138a0e4a
+          taskId: 07a3bd28-ae51-5e61-a7b3-6226fcd60701

@@ -1,0 +1,87 @@
+---
+parameters:
+  - { name: marketplaceConnection, type: string, default: "" }
+  - { name: publisherId, type: string, default: "" }
+  - { name: extensionId, type: string, default: "" }
+  - { name: extensionName, type: string, default: "" }
+  - { name: extensionPricing, type: string, default: "free" }
+  - { name: extensionTag, type: string, default: "" }
+  - { name: extensionVisibility, type: string, default: "private" }
+  - { name: taskNameSuffix, type: string, default: "" }
+
+jobs:
+  - job: publish
+    displayName: "Publish ${{ parameters.extensionVisibility }}"
+    steps:
+      - task: NodeTool@0
+        inputs:
+          versionSource: spec
+          versionSpec: 20.x
+
+      - task: Npm@1
+        displayName: Install dependencies
+        inputs:
+          command: custom
+          customCommand: run ci
+          verbose: false
+        env:
+          NODE_ENV: production
+
+      - task: Npm@1
+        displayName: Run build
+        inputs:
+          command: custom
+          customCommand: run build
+          verbose: false
+
+      - task: TfxInstaller@5
+        inputs:
+          version: "v0.x"
+
+      - task: QueryAzureDevOpsExtensionVersion@5
+        continueOnError: true
+        inputs:
+          connectTo: "VsTeam"
+          connectedServiceName: ${{ parameters.marketplaceConnection }}
+          publisherId: ${{ parameters.publisherId }}
+          extensionId: ${{ parameters.extensionId }}
+          extensionTag: ${{ parameters.extensionTag }}
+          versionAction: "Patch"
+
+      - bash: |
+          version=$(Extension.Version)
+          if [ "$AGENT_JOBSTATUS" = "SucceededWithIssues" ]; then
+            echo "Fallback to the version from the manifest"
+            version=$(jq -r '.version' vss-extension.json)
+          fi
+          echo "##vso[task.setvariable variable=Extension.Version;isOutput=false;issecret=false;]$version"
+          echo "##vso[task.setvariable variable=Extension.Version;isOutput=true;issecret=false;]$version"
+        displayName: "Fallback version from manifest"
+        name: QueryVersion
+
+      - ${{ if ne(parameters.taskNameSuffix, '') }}:
+          - bash: |
+              echo "Find all task.json files and update the "name" property in place using yq"
+              find . -type f -name "task.json" | while read -r file; do
+                echo "Updating $file"
+                yq eval '.name = (.name + "${{ parameters.taskNameSuffix }}")' -i "$file"
+                yq eval '.friendlyName = (.friendlyName + " ${{ parameters.taskNameSuffix }}")' -i "$file"
+              done
+            displayName: "Update task's names with suffix"
+
+      - task: PublishAzureDevOpsExtension@5
+        inputs:
+          connectTo: "VsTeam"
+          connectedServiceName: ${{ parameters.marketplaceConnection }}
+          fileType: "manifest"
+          publisherId: ${{ parameters.publisherId }}
+          extensionId: ${{ parameters.extensionId }}
+          extensionTag: ${{ parameters.extensionTag }}
+          extensionName: ${{ parameters.extensionName }}
+          extensionPricing: ${{ parameters.extensionPricing }}
+          extensionVisibility: ${{ parameters.extensionVisibility }}
+          extensionVersion: "$(Extension.Version)"
+          updateTasksVersion: true
+          ${{ if eq(parameters.extensionVisibility, 'private') }}:
+            shareWith: ${{ split(variables['System.CollectionUri'], '/')[3] }}
+            updateTasksId: true

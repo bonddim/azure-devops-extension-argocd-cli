@@ -3,10 +3,10 @@ import os = require("os");
 import task = require("azure-pipelines-task-lib/task");
 import tool = require("azure-pipelines-tool-lib/tool");
 
-const FallbackVersion = "v2.14.1";
-const ReleaseUrl = "https://github.com/argoproj/argo-cd/releases";
-const ToolName = "argocd";
-let ServerUrl = "";
+const fallbackVersion = "v2.14.2";
+const releaseUrl = "https://github.com/argoproj/argo-cd/releases";
+const toolName = "argocd";
+let serverUrl = "";
 
 const fileExtension = os.platform() === "win32" ? ".exe" : "";
 
@@ -20,32 +20,40 @@ async function run() {
     }
 
     const versionSpec = await resolveVersion(inputVersion);
-    const toolPath = tool.findLocalTool(ToolName, versionSpec);
+    const toolPath = tool.findLocalTool(toolName, versionSpec);
     if (!toolPath) {
       await installCli(versionSpec);
     } else {
       tool.prependPath(toolPath);
     }
-    task.execSync(ToolName, "version --client");
+    task.execSync(toolName, "version --client");
 
-  } catch (err: any) {
-    task.setResult(task.TaskResult.Failed, err.message);
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      task.setResult(task.TaskResult.Failed, err.message);
+    } else {
+      task.setResult(task.TaskResult.Failed, JSON.stringify(err));
+    }
   }
 }
 
 function getEndpointDetails() {
-  const endpoint = task.getInput("connection", false);
+  const endpoint = task.getInput("connection", false) ?? "";
 
   if (!endpoint) {
     task.debug("No service connection provided");
     return;
   }
 
-  ServerUrl = task.getEndpointUrlRequired(endpoint);
-  const apitoken = task.getEndpointAuthorizationParameterRequired(endpoint, "apitoken");
-  const url = new URL(ServerUrl);
-  task.setVariable("ARGOCD_SERVER", url.host + (url.pathname !== "/" ? url.pathname : ""));
-  task.setVariable("ARGOCD_AUTH_TOKEN", apitoken);
+  serverUrl = task.getEndpointUrl(endpoint, true) ?? "";
+  const apitoken = task.getEndpointAuthorizationParameter(endpoint, "apitoken", true) ?? "";
+  if (serverUrl) {
+    const url = new URL(serverUrl);
+    task.setVariable("ARGOCD_SERVER", url.host + (url.pathname !== "/" ? url.pathname : ""));
+  }
+  if (apitoken) {
+    task.setVariable("ARGOCD_AUTH_TOKEN", apitoken);
+  }
 }
 
 async function resolveVersion(inputVersion: string): Promise<string> {
@@ -53,9 +61,9 @@ async function resolveVersion(inputVersion: string): Promise<string> {
 
   switch (inputVersion.toLowerCase()) {
   case "latest":
-    return resolveLatest(ReleaseUrl);
+    return resolveLatest(releaseUrl);
   case "server":
-    return resolveServer(ServerUrl);
+    return resolveServer(serverUrl);
   default:
     return inputVersion;
   }
@@ -68,8 +76,8 @@ async function resolveLatest(url: string): Promise<string> {
   const version = parts?.pop();
 
   if (!version) {
-    task.warning(`Failed to resolve version. Using fallback version ${FallbackVersion}`);
-    return FallbackVersion;
+    task.warning(`Failed to resolve version. Using fallback version ${fallbackVersion}`);
+    return fallbackVersion;
   }
 
   task.debug(`Resolved ${version} version`);
@@ -82,8 +90,8 @@ async function resolveServer(url: string): Promise<string> {
   const versionFull = data.Version;
 
   if (!versionFull) {
-    task.warning(`Failed to resolve version. Using fallback version ${FallbackVersion}`);
-    return FallbackVersion;
+    task.warning(`Failed to resolve version. Using fallback version ${fallbackVersion}`);
+    return fallbackVersion;
   }
 
   const version = versionFull.split("+")[0];
@@ -99,7 +107,7 @@ async function installCli(version: string) {
     fs.chmodSync(tempFilePath, "0755");
   }
 
-  const cachedPath = await tool.cacheFile(tempFilePath, ToolName + fileExtension, ToolName, version);
+  const cachedPath = await tool.cacheFile(tempFilePath, toolName + fileExtension, toolName, version);
   task.debug("Cached tool at: " + cachedPath);
   tool.prependPath(cachedPath);
 }
@@ -120,7 +128,7 @@ async function getDownloadUrl(version: string): Promise<string> {
   if (!supportedArchs.includes(currentArch)) {
     throw new Error(`Unsupported architecture for ${currentPlatform}: ${currentArch}`);
   }
-  return `${ReleaseUrl}/download/${version}/${ToolName}-${currentPlatform}-${currentArch}${fileExtension}`;
+  return `${releaseUrl}/download/${version}/${toolName}-${currentPlatform}-${currentArch}${fileExtension}`;
 }
 
 run();

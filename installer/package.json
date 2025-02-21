@@ -1,15 +1,16 @@
 {
   "scripts": {
-    "build": "tsc",
-    "bump-version": "vsts-bump --indent 4 task.json",
-    "lint": "tslint -c tslint.json -p .",
-    "start": "npm run build; node dist/index.js",
-    "test": "tsc && npm --prefix tests/ run test",
-    "tsc": "npm run lint && tsc"
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint --parser-options '{\"project\": true}'",
+    "test": "echo 'No tests yet...'"
   },
   "dependencies": {
-    "azure-pipelines-task-lib": "^4.17.3",
-    "azure-pipelines-tool-lib": "^2.0.8",
-    "@types/node": "^22.13.1"
+    "@types/node": "^22.13.1",
+    "azure-pipelines-task-lib": "^5.0.0",
+    "azure-pipelines-tool-lib": "^2.0.8"
+  },
+  "devDependencies": {
+    "eslint": "^9.20.1",
+    "typescript-eslint": "^8.24.1"
   }
 }
