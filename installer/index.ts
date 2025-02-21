@@ -38,18 +38,22 @@ async function run() {
 }
 
 function getEndpointDetails() {
-  const endpoint = task.getInput("connection", false);
+  const endpoint = task.getInput("connection", false) ?? "";
 
   if (!endpoint) {
     task.debug("No service connection provided");
     return;
   }
 
-  serverUrl = task.getEndpointUrlRequired(endpoint);
-  const apitoken = task.getEndpointAuthorizationParameterRequired(endpoint, "apitoken");
-  const url = new URL(serverUrl);
-  task.setVariable("ARGOCD_SERVER", url.host + (url.pathname !== "/" ? url.pathname : ""));
-  task.setVariable("ARGOCD_AUTH_TOKEN", apitoken);
+  serverUrl = task.getEndpointUrl(endpoint, true) ?? "";
+  const apitoken = task.getEndpointAuthorizationParameter(endpoint, "apitoken", true) ?? "";
+  if (serverUrl) {
+    const url = new URL(serverUrl);
+    task.setVariable("ARGOCD_SERVER", url.host + (url.pathname !== "/" ? url.pathname : ""));
+  }
+  if (apitoken) {
+    task.setVariable("ARGOCD_AUTH_TOKEN", apitoken);
+  }
 }
 
 async function resolveVersion(inputVersion: string): Promise<string> {
