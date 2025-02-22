@@ -18,7 +18,6 @@ stages:
       - template: templates/ci.yaml
 
   - stage: Private
-    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
     jobs:
       - template: templates/publish.yaml
         parameters:

@@ -1,4 +1,7 @@
 ---
+${{ if eq(variables['Build.Reason'], 'ResourceTrigger') }}:
+  name: $(resources.pipeline.e2e.runName)
+
 resources:
   pipelines:
     - pipeline: e2e
