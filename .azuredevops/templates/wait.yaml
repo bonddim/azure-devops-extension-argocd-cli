@@ -8,7 +8,7 @@ parameters:
   - { name: taskId, type: string, default: "" }
   # Number of retries to perform the lookup
   - { name: retryCount, type: number, default: 10 }
-  - { name: delayForMinutes, type: number, default: 2 }
+  - { name: delayForMinutes, type: number, default: 1 }
 
 jobs:
   - job: wait

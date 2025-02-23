@@ -54,6 +54,7 @@ jobs:
             echo "Fallback to the version from the manifest"
             version=$(jq -r '.version' vss-extension.json)
           fi
+          set -x
           echo "##vso[task.setvariable variable=Extension.Version;isOutput=false;issecret=false;]$version"
           echo "##vso[task.setvariable variable=Extension.Version;isOutput=true;issecret=false;]$version"
         displayName: "Fallback version from manifest"
@@ -82,6 +83,17 @@ jobs:
           extensionVisibility: ${{ parameters.extensionVisibility }}
           extensionVersion: "$(Extension.Version)"
           updateTasksVersion: true
+          noWaitValidation: true
           ${{ if eq(parameters.extensionVisibility, 'private') }}:
             shareWith: ${{ split(variables['System.CollectionUri'], '/')[3] }}
             updateTasksId: true
+
+      - task: IsAzureDevOpsExtensionValid@5
+        inputs:
+          connectTo: "VsTeam"
+          connectedServiceName: ${{ parameters.marketplaceConnection }}
+          method: "id"
+          publisherId: ${{ parameters.publisherId }}
+          extensionId: ${{ parameters.extensionId }}
+          extensionTag: ${{ parameters.extensionTag }}
+          extensionVersion: "$(Extension.Version)"
