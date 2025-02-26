@@ -40,6 +40,7 @@ jobs:
 
       - task: QueryAzureDevOpsExtensionVersion@5
         continueOnError: true
+        name: QueryVersion
         inputs:
           connectTo: "VsTeam"
           connectedServiceName: ${{ parameters.marketplaceConnection }}
@@ -48,18 +49,6 @@ jobs:
           extensionTag: ${{ parameters.extensionTag }}
           versionAction: "Patch"
 
-      - bash: |
-          version=$(Extension.Version)
-          if [ "$AGENT_JOBSTATUS" = "SucceededWithIssues" ]; then
-            echo "Fallback to the version from the manifest"
-            version=$(jq -r '.version' vss-extension.json)
-          fi
-          set -x
-          echo "##vso[task.setvariable variable=Extension.Version;isOutput=false;issecret=false;]$version"
-          echo "##vso[task.setvariable variable=Extension.Version;isOutput=true;issecret=false;]$version"
-        displayName: "Fallback version from manifest"
-        name: QueryVersion
-
       - ${{ if ne(parameters.taskNameSuffix, '') }}:
           - bash: |
               echo "Find all task.json files and update the "name" property in place using yq"
@@ -67,6 +56,7 @@ jobs:
                 echo "Updating $file"
                 yq eval '.name = (.name + "${{ parameters.taskNameSuffix }}")' -i "$file"
                 yq eval '.friendlyName = (.friendlyName + " ${{ parameters.taskNameSuffix }}")' -i "$file"
+                cat "$file"
               done
             displayName: "Update task's names with suffix"
 
