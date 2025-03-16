@@ -3,7 +3,7 @@ import os = require("os");
 import task = require("azure-pipelines-task-lib/task");
 import tool = require("azure-pipelines-tool-lib/tool");
 
-const fallbackVersion = "v2.14.2";
+const fallbackVersion = "v2.14.5";
 const releaseUrl = "https://github.com/argoproj/argo-cd/releases";
 const toolName = "argocd";
 let serverUrl = "";
@@ -11,30 +11,20 @@ let serverUrl = "";
 const fileExtension = os.platform() === "win32" ? ".exe" : "";
 
 async function run() {
-  try {
-    getEndpointDetails();
-    const inputVersion: string | undefined = task.getInput('version') ?? "latest";
-    const inputOpts: string | undefined = task.getInput('options');
-    if (inputOpts) {
-      task.setVariable("ARGOCD_OPTS", inputOpts);
-    }
-
-    const versionSpec = await resolveVersion(inputVersion);
-    const toolPath = tool.findLocalTool(toolName, versionSpec);
-    if (!toolPath) {
-      await installCli(versionSpec);
-    } else {
-      tool.prependPath(toolPath);
-    }
-    task.execSync(toolName, "version --client");
-
-  } catch (err: unknown) {
-    if (err instanceof Error) {
-      task.setResult(task.TaskResult.Failed, err.message);
-    } else {
-      task.setResult(task.TaskResult.Failed, JSON.stringify(err));
-    }
+  getEndpointDetails();
+  const inputVersion = task.getInput('version') ?? "latest";
+  const inputOpts = task.getInput('options');
+  if (inputOpts) {
+    task.setVariable("ARGOCD_OPTS", inputOpts);
   }
+
+  const versionSpec = await resolveVersion(inputVersion);
+  let toolPath = tool.findLocalTool(toolName, versionSpec);
+  if (!toolPath) {
+    toolPath = await installCli(versionSpec);
+  }
+  tool.prependPath(toolPath);
+  task.execSync(toolName, "version --client");
 }
 
 function getEndpointDetails() {
@@ -66,13 +56,14 @@ async function resolveVersion(inputVersion: string): Promise<string> {
 }
 
 async function resolveLatest(url: string): Promise<string> {
+  console.log(`Resolving version from ${url}`);
   const response = await fetch(new Request(`${url}/latest`, { redirect: "manual" }));
   const locationHeader = response.headers.get("location");
   const parts = locationHeader?.split("/");
   const version = parts?.pop();
 
   if (!version) {
-    task.warning(`Failed to resolve version. Using fallback version ${fallbackVersion}`);
+    task.warning(`Failed to resolve latest version. Using fallback version ${fallbackVersion}`);
     return fallbackVersion;
   }
 
@@ -81,21 +72,20 @@ async function resolveLatest(url: string): Promise<string> {
 }
 
 async function resolveServer(url: string): Promise<string> {
-  const response = await fetch(new Request(`${url}/api/version`));
-  const data = await response.json();
-  const versionFull = data.Version;
-
-  if (!versionFull) {
-    task.warning(`Failed to resolve version. Using fallback version ${fallbackVersion}`);
-    return fallbackVersion;
+  console.log(`Resolving version from ${url}`);
+  try {
+    const response = await fetch(new Request(`${url}/api/version`));
+    const data = await response.json();
+    const versionFull = data.Version;
+    const version = versionFull?.split("+")[0];
+    task.debug(`Resolved ${version} version`);
+    return version;
+  } catch {
+    throw new Error(`Failed to fetch version from server ${url}`);
   }
-
-  const version = versionFull.split("+")[0];
-  task.debug(`Resolved ${version} version`);
-  return version;
 }
 
-async function installCli(version: string) {
+async function installCli(version: string): Promise<string> {
   const downloadUrl = await getDownloadUrl(version);
   const tempFilePath = await tool.downloadTool(downloadUrl);
 
@@ -105,7 +95,7 @@ async function installCli(version: string) {
 
   const cachedPath = await tool.cacheFile(tempFilePath, toolName + fileExtension, toolName, version);
   task.debug("Cached tool at: " + cachedPath);
-  tool.prependPath(cachedPath);
+  return cachedPath;
 }
 
 async function getDownloadUrl(version: string): Promise<string> {
@@ -127,4 +117,10 @@ async function getDownloadUrl(version: string): Promise<string> {
   return `${releaseUrl}/download/${version}/${toolName}-${currentPlatform}-${currentArch}${fileExtension}`;
 }
 
-run();
+run().catch((err: unknown) => {
+  if (err instanceof Error) {
+    task.setResult(task.TaskResult.Failed, err.message);
+  } else {
+    task.setResult(task.TaskResult.Failed, JSON.stringify(err));
+  }
+});
