@@ -72,7 +72,7 @@ jobs:
           updateTasksVersion: true
           updateTasksId: ${{ iif (eq(parameters.extensionVisibility, 'private'), 'true', 'false') }}
 
-      - publish: "*.vsix"
+      - publish: "${{ parameters.publisherId }}.${{ parameters.extensionName }}-$(Extension.Version).vsix"
         artifact: ${{ parameters.extensionVisibility }}
 
   - deployment: publish
