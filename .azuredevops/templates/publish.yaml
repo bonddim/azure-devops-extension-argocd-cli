@@ -85,12 +85,16 @@ jobs:
       runOnce:
         deploy:
           steps:
+            - task: TfxInstaller@5
+              inputs:
+                version: "v0.x"
+
             - task: PublishAzureDevOpsExtension@5
               inputs:
                 connectTo: "VsTeam"
                 connectedServiceName: ${{ parameters.marketplaceConnection }}
                 fileType: "vsix"
-                vsixFile: "*.vsix"
+                vsixFile: "$(Pipeline.Workspace)/${{ parameters.extensionVisibility }}/*.vsix"
                 updateTasksVersion: false
                 noWaitValidation: true
                 ${{ if eq(parameters.extensionVisibility, 'private') }}:
