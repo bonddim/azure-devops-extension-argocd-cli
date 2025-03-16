@@ -10,8 +10,8 @@ parameters:
   - { name: taskNameSuffix, type: string, default: "" }
 
 jobs:
-  - job: publish
-    displayName: Publish
+  - job: package
+    displayName: Package
     steps:
       - task: NodeTool@0
         inputs:
@@ -60,11 +60,8 @@ jobs:
               done
             displayName: "Update task's names with suffix"
 
-      - task: PublishAzureDevOpsExtension@5
+      - task: PackageAzureDevOpsExtension@5
         inputs:
-          connectTo: "VsTeam"
-          connectedServiceName: ${{ parameters.marketplaceConnection }}
-          fileType: "manifest"
           publisherId: ${{ parameters.publisherId }}
           extensionId: ${{ parameters.extensionId }}
           extensionTag: ${{ parameters.extensionTag }}
@@ -73,17 +70,38 @@ jobs:
           extensionVisibility: ${{ parameters.extensionVisibility }}
           extensionVersion: "$(Extension.Version)"
           updateTasksVersion: true
-          noWaitValidation: true
-          ${{ if eq(parameters.extensionVisibility, 'private') }}:
-            shareWith: ${{ split(variables['System.CollectionUri'], '/')[3] }}
-            updateTasksId: true
+          updateTasksId: ${{ iif (eq(parameters.extensionVisibility, 'private'), 'true', 'false') }}
 
-      - task: IsAzureDevOpsExtensionValid@5
-        inputs:
-          connectTo: "VsTeam"
-          connectedServiceName: ${{ parameters.marketplaceConnection }}
-          method: "id"
-          publisherId: ${{ parameters.publisherId }}
-          extensionId: ${{ parameters.extensionId }}
-          extensionTag: ${{ parameters.extensionTag }}
-          extensionVersion: "$(Extension.Version)"
+      - publish: "*.vsix"
+        artifact: ${{ parameters.extensionVisibility }}
+
+  - deployment: publish
+    displayName: Publish
+    dependsOn: package
+    environment: ${{ parameters.extensionVisibility }}
+    variables:
+      Extension.Version: $[ dependencies.package.outputs['QueryVersion.Extension.Version'] ]
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - task: PublishAzureDevOpsExtension@5
+              inputs:
+                connectTo: "VsTeam"
+                connectedServiceName: ${{ parameters.marketplaceConnection }}
+                fileType: "vsix"
+                vsixFile: "*.vsix"
+                updateTasksVersion: false
+                noWaitValidation: true
+                ${{ if eq(parameters.extensionVisibility, 'private') }}:
+                  shareWith: ${{ split(variables['System.CollectionUri'], '/')[3] }}
+
+            - task: IsAzureDevOpsExtensionValid@5
+              inputs:
+                connectTo: "VsTeam"
+                connectedServiceName: ${{ parameters.marketplaceConnection }}
+                method: "id"
+                publisherId: ${{ parameters.publisherId }}
+                extensionId: ${{ parameters.extensionId }}
+                extensionTag: ${{ parameters.extensionTag }}
+                extensionVersion: "$(Extension.Version)"
