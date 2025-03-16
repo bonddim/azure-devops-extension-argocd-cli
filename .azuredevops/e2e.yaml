@@ -2,7 +2,7 @@
 resources:
   pipelines:
     - pipeline: ci
-      source: bonddim.argocd-azure-devops-task-ci
+      source: ci
       trigger: true
 
 trigger: none
