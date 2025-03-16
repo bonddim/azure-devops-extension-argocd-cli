@@ -13,12 +13,12 @@ parameters:
 jobs:
   - job: wait
     displayName: Wait
-    dependsOn: publish
+    dependsOn: [package, publish]
     timeoutInMinutes: 60
     pool: server
     variables:
       System.Debug: true
-      version: $[ dependencies.publish.outputs['QueryVersion.Extension.Version'] ]
+      version: $[ dependencies.package.outputs['QueryVersion.Extension.Version'] ]
     steps:
       - task: Delay@1
         inputs:
