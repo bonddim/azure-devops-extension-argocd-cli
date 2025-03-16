@@ -1,17 +1,10 @@
 ---
-resources:
-  pipelines:
-    - pipeline: e2e
-      source: e2e
-      trigger:
-        branches:
-          include:
-            - main
-
-trigger: none
 pr: none
+trigger:
+  - main
 
 jobs:
+  - template: templates/ci.yaml
   - template: templates/publish.yaml
     parameters:
       marketplaceConnection: e5af4fa9-9ce8-48be-88bf-ad06b71c2017
