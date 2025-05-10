@@ -17,18 +17,18 @@
   },
   "links": {
     "repository": {
-      "uri": "ttps://github.com/bonddim/argocd-azure-devops-task"
+      "uri": "https://github.com/bonddim/azure-devops-extension-argocd-cli"
     },
     "issues": {
-      "uri": "https://github.com/bonddim/argocd-azure-devops-task/issues"
+      "uri": "https://github.com/bonddim/azure-devops-extension-argocd-cli/issues"
     },
     "support": {
-      "uri": "https://github.com/bonddim/argocd-azure-devops-task/issues"
+      "uri": "https://github.com/bonddim/azure-devops-extension-argocd-cli/issues"
     }
   },
   "repository": {
     "type": "git",
-    "uri": "https://github.com/bonddim/argocd-azure-devops-task"
+    "uri": "https://github.com/bonddim/azure-devops-extension-argocd-cli"
   },
   "tags": ["Argo CD", "Argo CD CLI", "Tool", "Installer"],
   "targets": [

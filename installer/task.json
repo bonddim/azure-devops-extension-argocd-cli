@@ -4,7 +4,7 @@
   "name": "ArgoCDInstaller",
   "friendlyName": "Argo CD CLI Installer",
   "description": "Install ArgoCD CLI",
-  "helpMarkDown": "https://github.com/bonddim/argocd-azure-devops-task",
+  "helpMarkDown": "https://github.com/bonddim/azure-devops-extension-argocd-cli",
   "category": "Utility",
   "author": "Dmytro Bondar",
   "version": {
